@@ -1,5 +1,4 @@
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 using namespace std;
@@ -8,41 +7,6 @@ const char in[]{"in/day3.in"};
 const char out[]{"out/day3.out"};
 
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
-
-struct tree {
-  int zero;
-  int one;
-  struct tree *right, *left;
-};
-
-struct tree *newTree() {
-  tree *tmp = new tree;
-  tmp->zero = tmp->one = 0;
-  tmp->right = tmp->left = NULL;
-  return tmp;
-}
-
-struct tree *add_to_tree(tree *t, long num) {
-  if (t == NULL) {
-    tree t{};
-  }
-  struct tree *tmp;
-  if (num > 0) {
-    tree *tmp = new tree;
-    if (num % 2) {
-      tmp->one = t->one + 1;
-      tmp->zero = t->zero;
-      tmp->left = t->left;
-      tmp->right = add_to_tree(t->right, num / 2);
-    } else {
-      tmp->zero = t->zero + 1;
-      tmp->one = t->one;
-      tmp->right = t->right;
-      tmp->left = add_to_tree(t->left, num / 2);
-    }
-  }
-  return tmp;
-}
 
 long bintodec(long bin) {
   long dec = 0;
@@ -81,35 +45,60 @@ int part1() {
   return result * ((1 << 12) - 1 - result);
 }
 
-long get_oxy(tree *t, int mul) {
-  if (mul < 0)
-    return 0;
-  else if (t->zero < t->one)
-    return (1 << mul) + get_oxy(t->right, mul - 1);
-  else
-    return get_oxy(t->left, mul - 1);
+struct Node {
+  int zero, one;
+  Node *left, *right;
+};
+
+Node *new_node() {
+  Node *newNode = new Node();
+  newNode->one = newNode->zero = 0;
+  newNode->left = newNode->right = NULL;
+  return newNode;
 }
 
-long get_co2(tree *t, int mul) {
-  if (mul < 0)
+Node *add(Node *root, int num, int bit) {
+  if (bit < 0)
+    return root;
+  if (root == NULL)
+    root = new_node();
+  if (CHECK_BIT(num, bit)) {
+    root->one++;
+    root->right = add(root->right, num, bit - 1);
+  } else {
+    root->zero++;
+    root->left = add(root->left, num, bit - 1);
+  }
+  return root;
+}
+
+long get_oxy(Node *root, int bit) {
+  if (bit < 0)
     return 0;
-  else if (t->zero < t->one)
-    return get_co2(t->left, mul - 1);
-  else
-    return (1 << mul) + get_co2(t->right, mul - 1);
+  if (root->one < root->zero && 0 < root->one)
+    return get_oxy(root->left, bit - 1);
+  return (1 << bit) + get_oxy(root->right, bit - 1);
+}
+
+long get_co2(Node *root, int bit) {
+  if (bit < 0)
+    return 0;
+  if (root->one < root->zero && 0 < root->one)
+    return (1 << bit) + get_co2(root->right, bit - 1);
+  return get_co2(root->left, bit - 1);
 }
 
 int part2() {
   ifstream ifs(in);
-  tree *t{};
+  Node *root = NULL;
   string line;
   long num;
   while (ifs >> line) {
     num = bintodec(stol(line));
-    t = add_to_tree(t, num);
+    root = add(root, num, 11);
   }
   ifs.close();
-  return get_oxy(t, 12) * get_co2(t, 12);
+  return get_oxy(root, 11) * get_co2(root, 11);
 }
 
 int main() {
