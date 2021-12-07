@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 
 using namespace std;
 
@@ -12,20 +13,15 @@ int64_t breed(int days) {
 
   ifstream ifs(in);
   while (ifs >> fish) {
-    a[fish]++;
+    a[(days - fish - 1) % 9]++;
     ifs >> _;
   }
   ifs.close();
 
-  while (days-- > 0) {
-    int64_t tmp = a[0];
-    for (int i = 0; i < 8; i++)
-      a[i] = a[i + 1];
-    a[6] += tmp;
-    a[8] = tmp;
-  }
+  while (days-- > 0)
+    a[(days + 2) % 9] += a[days % 9];
 
-  int64_t sum;
+  int64_t sum = 0;
   for (int i = 0; i < 9; i++)
     sum += a[i];
   return sum;
