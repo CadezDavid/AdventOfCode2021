@@ -11,59 +11,42 @@ const char out[]{"out/day11.out"};
 const int X{10};
 const int Y{10};
 const int DAYS{100};
-int directions[8]{1, -1, 10, -10, 11, -11, 9, -9};
+vector<vector<int>> directions{{1, 0},  {0, 1},  {-1, 0}, {0, -1},
+                               {1, -1}, {-1, 1}, {1, 1},  {-1, -1}};
 
-int x(int i, int di) {
-  if (di == 9)
-    return i % X - 1;
-  else if (di == -9)
-    return i % X + 1;
-  return i % X + di % X;
-}
-int y(int i, int di) {
-  if (di == 9)
-    return i / Y + 1;
-  else if (di == -9)
-    return i / Y - 1;
-  return i / Y + di / Y;
-}
-bool is_valid(int i, int di) {
-  return (0 <= x(i, di) && x(i, di) < X && 0 <= y(i, di) && y(i, di) < Y);
-}
+bool is_valid(int x, int y) { return (0 <= y && x < X && 0 <= y && y < Y); }
 
 int part1() {
   ifstream ifs(in);
-  int cavern[X * Y];
+  int cavern[X][Y];
   int flashes{0};
   char oct;
   for (int i = 0; ifs >> oct; i++) {
-    cavern[i] = (int)oct - '0';
+    cavern[i % X][i / X] = (int)oct - '0';
   }
   ifs.close();
-  stack<int> stack{};
+  stack<vector<int>> stack{};
   int n = DAYS;
   while (n-- > 0) {
     for (int i = 0; i < X * Y; i++)
-      cavern[i]++;
-    for (int i = 0; i < X * Y; i++) {
-      int curr{0};
-      stack = {};
-      if (cavern[i] > 9)
-        stack.push(i);
-      while (!stack.empty()) {
-        int c = stack.top();
-        stack.pop();
-        if (cavern[c] > 9) {
-          for (int di : directions)
-            if (is_valid(c, di) && cavern[c + di])
-              if (++cavern[c + di] > 9)
-                stack.push(c + di);
-          cavern[c] = 0;
+      cavern[i % X][i / X]++;
+    for (int y = 0; y < Y; y++) {
+      for (int x = 0; x < X; x++) {
+        int curr{0};
+        stack = {};
+        if (cavern[x][y] > 9)
+          stack.push({x, y});
+        while (!stack.empty()) {
+          vector<int> c = stack.top();
+          stack.pop();
+          for (vector<int> d : directions)
+            if (is_valid(c[0] + d[0], c[1] + d[1]))
+              if (++cavern[c[0] + d[0]][c[1] + d[1]] > 9)
+                stack.push({c[0] + d[0], c[1] + d[1]});
+          cavern[c[0]][c[1]] = 0;
           flashes++;
         }
       }
-      if (curr == X * Y)
-        return n;
     }
   }
   return flashes;
@@ -71,36 +54,37 @@ int part1() {
 
 int part2() {
   ifstream ifs(in);
-  int cavern[X * Y];
+  int cavern[X][Y];
+  int flashes{0};
   char oct;
   for (int i = 0; ifs >> oct; i++) {
-    cavern[i] = (int)oct - '0';
+    cavern[i % X][i / X] = (int)oct - '0';
   }
   ifs.close();
-  stack<int> stack{};
-  int n = 0;
-  while (++n) {
+  stack<vector<int>> stack{};
+  int n = DAYS;
+  while (n-- > 0) {
     for (int i = 0; i < X * Y; i++)
-      cavern[i]++;
-    for (int i = 0; i < X * Y; i++) {
-      int curr{0};
-      stack = {};
-      if (cavern[i] > 9)
-        stack.push(i);
-      while (!stack.empty()) {
-        int c = stack.top();
-        stack.pop();
-        if (cavern[c] > 9) {
-          for (int di : directions)
-            if (is_valid(c, di) && cavern[c + di])
-              if (++cavern[c + di] > 9)
-                stack.push(c + di);
-          cavern[c] = 0;
-          curr++;
+      cavern[i % X][i / X]++;
+    for (int y = 0; y < Y; y++) {
+      for (int x = 0; x < X; x++) {
+        int curr{0};
+        stack = {};
+        if (cavern[x][y] > 9)
+          stack.push({x, y});
+        while (!stack.empty()) {
+          vector<int> c = stack.top();
+          stack.pop();
+          for (vector<int> d : directions)
+            if (is_valid(c[0] + d[0], c[1] + d[1]))
+              if (++cavern[c[0] + d[0]][c[1] + d[1]] > 9)
+                stack.push({c[0] + d[0], c[1] + d[1]});
+          cavern[c[0]][c[1]] = 0;
+          flashes++;
         }
+        if (curr == X * Y)
+          return n;
       }
-      if (curr == X * Y)
-        return n;
     }
   }
   return INT32_MAX;
