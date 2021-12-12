@@ -56,7 +56,6 @@ int get_num(unordered_map<char, char> dict, string str) {
   }
   for (int i = 0; i < 10; i++) {
     if (s == numbers[i]) {
-      cout << "tu sem: " << i << endl << endl;
       return i;
     }
   }
