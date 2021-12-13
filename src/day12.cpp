@@ -28,20 +28,20 @@ int count_paths(map<string, set<string>> graph, string current,
 }
 
 int count_paths_2(map<string, set<string>> graph, string current,
-                  set<string> visited, bool bonus) {
+                  set<string> visited) {
   if (current == "end")
     return 1;
   int sum = 0;
   for (string next : graph[current])
     if (next != "start" && visited.find(next) == visited.end()) {
       if (is_big(current)) {
-        sum += count_paths_2(graph, next, visited, bonus);
+        sum += count_paths_2(graph, next, visited);
       } else {
         visited.insert(current);
-        sum += count_paths_2(graph, next, visited, bonus);
+        sum += count_paths_2(graph, next, visited);
       }
-    } else if (next != "start" && bonus) {
-      sum += count_paths_2(graph, next, visited, false);
+    } else if (next != "start") {
+      sum += count_paths(graph, next, visited);
     }
   return sum;
 }
@@ -69,7 +69,7 @@ int part2() {
     graph[s].insert(e);
     graph[e].insert(s);
   }
-  return count_paths_2(graph, "start", {}, true);
+  return count_paths_2(graph, "start", {});
 }
 
 int main() {
