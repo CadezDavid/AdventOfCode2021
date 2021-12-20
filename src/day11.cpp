@@ -16,6 +16,7 @@ vector<vector<int>> directions{{1, 0},  {0, 1},  {-1, 0}, {0, -1},
 
 bool is_valid(int x, int y) { return (0 <= y && x < X && 0 <= y && y < Y); }
 
+
 int part1() {
   ifstream ifs(in);
   int cavern[X][Y];
